@@ -1,6 +1,7 @@
 #include <spdlog/spdlog.h>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+#include <iostream>
 
 void OnFramebufferSizeChange(GLFWwindow* window, int width, int height) {
     SPDLOG_INFO("framebuffer size changed: ({} x {})", width, height);
@@ -23,15 +24,16 @@ void OnKeyEvent(GLFWwindow* window, int key, int scancode, int action, int mods)
         switch (key){
             case GLFW_KEY_1:
                 glClearColor(0.0f, 0.0f, 1.0f, 1.0f);
-                SPDLOG_INFO("색상변경");
+                SPDLOG_INFO("color changed blue");
                 break;
             case GLFW_KEY_2:
                 glClearColor(1.0f, 0.0f, 0.0f, 1.0f);
-                SPDLOG_INFO("색상변경");
+                SPDLOG_INFO("color changed red");
                 break;
             case GLFW_KEY_3:
                 glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-                SPDLOG_INFO("색상변경");
+                std::cout<<"color changed black"<<std::endl;
+                //SPDLOG_INFO("color changed black");
                 break;
         }
     }
@@ -68,7 +70,8 @@ int main(int argc, const char** argv) {
     
     // glad를 활용한 OpenGL 함수 로딩
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
-        SPDLOG_ERROR("failed to initialize glad");
+        std::cerr<<"failed to initialize glad"<<std::endl;
+        //SPDLOG_ERROR("failed to initialize glad");
         glfwTerminate();
         return -1;
     }
