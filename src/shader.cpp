@@ -11,6 +11,12 @@ ShaderUPtr Shader::CreateFromFile(const std::string& filename,GLenum shaderType)
     //false를 리턴하면  shader는 nullptr로 초기화되고
     }
 
+    Shader::~Shader() {
+      if (m_shader != 0) {
+          glDeleteShader(m_shader);
+      }
+    }
+
     bool Shader::LoadFile(const std::string& filename, GLenum shaderType) {
         auto result = LoadTextFile(filename);
         if (!result.has_value())
@@ -37,3 +43,5 @@ ShaderUPtr Shader::CreateFromFile(const std::string& filename,GLenum shaderType)
     }
     return true;
     }
+
+  

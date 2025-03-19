@@ -1,7 +1,10 @@
+#include "context.h"
+
 #include <spdlog/spdlog.h>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <iostream>
+
 
 void OnFramebufferSizeChange(GLFWwindow* window, int width, int height) {
     SPDLOG_INFO("framebuffer size changed: ({} x {})", width, height);
@@ -20,23 +23,7 @@ void OnKeyEvent(GLFWwindow* window, int key, int scancode, int action, int mods)
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
         glfwSetWindowShouldClose(window, true);
     }
-    if (action==GLFW_PRESS){
-        switch (key){
-            case GLFW_KEY_1:
-                glClearColor(0.0f, 0.0f, 1.0f, 1.0f);
-                SPDLOG_INFO("color changed blue");
-                break;
-            case GLFW_KEY_2:
-                glClearColor(1.0f, 0.0f, 0.0f, 1.0f);
-                SPDLOG_INFO("color changed red");
-                break;
-            case GLFW_KEY_3:
-                glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-                std::cout<<"color changed black"<<std::endl;
-                //SPDLOG_INFO("color changed black");
-                break;
-        }
-    }
+    
 }
 
 int main(int argc, const char** argv) {
@@ -80,20 +67,26 @@ int main(int argc, const char** argv) {
     // GLubyte* 타입을 const char*로 변환하여 출력
     SPDLOG_INFO("OpenGL context version: {}", reinterpret_cast<const char*>(glVersion));
 
+    auto context = Context::Create();
+    if (!context) {
+        SPDLOG_ERROR("failed to create context");
+        glfwTerminate();
+        return -1;
+}
+
     OnFramebufferSizeChange(window, WINDOW_WIDTH, WINDOW_HEIGHT);
     glfwSetFramebufferSizeCallback(window, OnFramebufferSizeChange);
     glfwSetKeyCallback(window, OnKeyEvent);
 
-    //기본색상지정
-    glClearColor(0.0f, 0.1f, 0.2f, 0.0f);
 
     // glfw 루프 실행, 윈도우 close 버튼을 누르면 정상 종료
     SPDLOG_INFO("Start main loop");
     while (!glfwWindowShouldClose(window)) {
-        glClear(GL_COLOR_BUFFER_BIT);
+        context->Render();
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
+    context.reset();
 
     glfwTerminate();
     return 0;
