@@ -8,7 +8,8 @@
 
 void OnFramebufferSizeChange(GLFWwindow* window, int width, int height) {
     SPDLOG_INFO("framebuffer size changed: ({} x {})", width, height);
-    glViewport(0, 0, width, height);
+    auto context = reinterpret_cast<Context*>(glfwGetWindowUserPointer(window));
+    context->Reshape(width, height);
 }
 
 void OnKeyEvent(GLFWwindow* window, int key, int scancode, int action, int mods) {
@@ -23,7 +24,18 @@ void OnKeyEvent(GLFWwindow* window, int key, int scancode, int action, int mods)
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
         glfwSetWindowShouldClose(window, true);
     }
-    
+}
+
+void OnMouseButton(GLFWwindow* window, int button, int action, int modifier) {
+    auto context = (Context*)glfwGetWindowUserPointer(window);
+    double x, y;
+    glfwGetCursorPos(window, &x, &y);
+    context->MouseButton(button, action, x, y);
+  }
+
+void OnCursorPos(GLFWwindow* window, double x, double y) {
+    auto context = (Context*)glfwGetWindowUserPointer(window);
+    context->MouseMove(x, y);
 }
 
 int main(int argc, const char** argv) {
@@ -72,20 +84,24 @@ int main(int argc, const char** argv) {
         SPDLOG_ERROR("failed to create context");
         glfwTerminate();
         return -1;
-}
+    }
+    glfwSetWindowUserPointer(window, context.get());
 
     OnFramebufferSizeChange(window, WINDOW_WIDTH, WINDOW_HEIGHT);
     glfwSetFramebufferSizeCallback(window, OnFramebufferSizeChange);
     glfwSetKeyCallback(window, OnKeyEvent);
+    glfwSetMouseButtonCallback(window, OnMouseButton);
+    glfwSetCursorPosCallback(window, OnCursorPos);
 
 
     // glfw 루프 실행, 윈도우 close 버튼을 누르면 정상 종료
     SPDLOG_INFO("Start main loop");
 
     while (!glfwWindowShouldClose(window)) {
+        glfwPollEvents();
+        context->ProcessInput(window);
         context->Render();
         glfwSwapBuffers(window);
-        glfwPollEvents();
     }
     context.reset();
 
